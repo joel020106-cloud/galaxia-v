@@ -13,7 +13,11 @@
   const zoomIn = document.querySelector('#zoom-in');
   const zoomOut = document.querySelector('#zoom-out');
   let w=0,h=0,dpr=1,yaw=.2,pitch=-.36,zoom=1,zoomTarget=1,vy=0,vp=0,drag=false,moved=false,lastX=0,lastY=0,startX=0,startY=0,lastT=0,active=false,interactive=false;
-  let audio,loopTimer,playing=false,pinchDistance=0,pinchZoom=1;
+  const audio=new Audio(encodeURI('assets/Camilo SÃ©ptimo - Ã“rbita.mp3'));
+  audio.loop=true;
+  audio.preload='metadata';
+  audio.volume=.4;
+  let playing=false,pinchDistance=0,pinchZoom=1;
   const pointers=new Map();
   const stars=[],dust=[],objects=[],hits=[];
   const sprites=['assets/sunflower-bouquet.webp','assets/rose-bouquet.webp','assets/tulip-bouquet.webp'].map(src=>{const img=new Image();img.src=src;return img});
@@ -37,22 +41,21 @@
   function frame(t){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);const bg=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*.72);bg.addColorStop(0,cfg.bgCenter);bg.addColorStop(.42,cfg.bgMid);bg.addColorStop(1,cfg.bgEdge);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);zoom+=(zoomTarget-zoom)*.075;if(!drag&&interactive){yaw+=vy;pitch+=vp;vy*=.94;vp*=.91;if(Math.abs(vy)<.00002)vy=0;if(Math.abs(vp)<.00002)vp=0}pitch=Math.max(-.82,Math.min(.82,pitch));
     const allStars=[...dust,...stars].map(s=>({s,p:project(s)})).sort((a,b)=>a.p.z-b.p.z);for(const {s,p} of allStars){if(p.scale<0||p.x<-20||p.x>w+20||p.y<-20||p.y>h+20)continue;const near=Math.max(.15,Math.min(1,(p.z+9)/16));ctx.globalAlpha=(s.a||.35)*near;ctx.fillStyle=s.c||cfg.dust;ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.35,s.s*p.scale*.035),0,7);ctx.fill()}
     const core=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.min(w,h)*.2);core.addColorStop(0,cfg.core);core.addColorStop(.18,cfg.coreSoft);core.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=1;ctx.fillStyle=core;ctx.fillRect(0,0,w,h);
-    drawSpiral();const hp=project({x:0,y:-1.65,z:0});drawHeart(hp.x,hp.y,Math.max(36,Math.min(104,hp.scale*.92)),`Para ${cfg.name||'ti'} ♡`,t);
+    drawSpiral();const hp=project({x:0,y:-1.65,z:0});drawHeart(hp.x,hp.y,Math.max(36,Math.min(104,hp.scale*.92)),`Para ${cfg.name||'ti'} â™¡`,t);
     hits.length=0;const sorted=objects.map(o=>({o,p:project(o)})).sort((a,b)=>a.p.z-b.p.z);for(const {o,p} of sorted){if(p.z>3.85)continue;const r=Math.max(22,Math.min(54,p.scale*.4)),alpha=Math.max(.42,Math.min(1,(p.z+6)/7)),img=sprites[o.kind%3],factor=[.86,.78,.72,.66,.6,.94][o.kind];let hitR=Math.max(38,r*1.55);ctx.save();ctx.globalAlpha=alpha;ctx.shadowColor=cfg.glow;ctx.shadowBlur=r*.6;if(img.complete&&img.naturalWidth){const iw=r*2.8*factor,ih=iw*img.naturalHeight/img.naturalWidth;ctx.drawImage(img,p.x-iw/2,p.y-ih*.55,iw,ih);hitR=Math.max(iw*.42,ih*.38)}else rose(p.x,p.y,r,0,alpha,o.kind);ctx.restore();ctx.save();ctx.globalAlpha=alpha;ctx.font=`700 ${Math.max(11,Math.min(15,r*.32))}px system-ui`;ctx.textAlign='center';ctx.fillStyle='#fff8d3';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(o.message.title,p.x,p.y+hitR*.98);ctx.restore();hits.push({x:p.x,y:p.y,r:Math.max(40,hitR),o})}
     ctx.globalAlpha=1;requestAnimationFrame(frame)}
   function findHit(x,y){let best=null,bd=1e9;for(const hit of hits){const d=Math.hypot(x-hit.x,y-hit.y);if(d<hit.r&&d<bd){best=hit;bd=d}}return best}
   function show(o){modalTitle.textContent=o.message.title;modalText.textContent=o.message.text;if(typeof modal.showModal==='function'){if(!modal.open)modal.showModal()}else modal.setAttribute('open','');burst(hits.find(h=>h.o===o))}
-  function burst(hit){if(!hit)return;for(let i=0;i<14;i++){const s=document.createElement('i');s.className='burst';s.textContent=i%3?'✦':'♡';s.style.left=hit.x+'px';s.style.top=hit.y+'px';s.style.setProperty('--x',rand(-110,110)+'px');s.style.setProperty('--y',rand(-110,110)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),1200)}}
+  function burst(hit){if(!hit)return;for(let i=0;i<14;i++){const s=document.createElement('i');s.className='burst';s.textContent=i%3?'âœ¦':'â™¡';s.style.left=hit.x+'px';s.style.top=hit.y+'px';s.style.setProperty('--x',rand(-110,110)+'px');s.style.setProperty('--y',rand(-110,110)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),1200)}}
   function point(e){return{x:e.clientX,y:e.clientY}}
   canvas.addEventListener('pointerdown',e=>{if(!interactive)return;canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,point(e));drag=true;moved=false;const p=point(e);lastX=startX=p.x;lastY=startY=p.y;lastT=performance.now();vy=vp=0;if(pointers.size===2){const p2=[...pointers.values()];pinchDistance=Math.hypot(p2[0].x-p2[1].x,p2[0].y-p2[1].y);pinchZoom=zoom}});
   canvas.addEventListener('pointermove',e=>{if(!drag)return;const p=point(e);pointers.set(e.pointerId,p);if(pointers.size>=2){const ps=[...pointers.values()],d=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);zoom=Math.max(.62,Math.min(1.75,pinchZoom*d/Math.max(20,pinchDistance)));moved=true;return}const now=performance.now(),dx=p.x-lastX,dy=p.y-lastY,dt=Math.max(8,now-lastT);if(Math.hypot(p.x-startX,p.y-startY)>7)moved=true;yaw+=dx*.014;pitch+=dy*.011;vy=dx/dt*.034;vp=dy/dt*.025;lastX=p.x;lastY=p.y;lastT=now});
   canvas.addEventListener('pointerup',e=>{pointers.delete(e.pointerId);drag=pointers.size>0;if(!moved&&!drag){const p=point(e),hit=findHit(p.x,p.y);if(hit)show(hit.o)}});canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);drag=pointers.size>0});
   canvas.addEventListener('wheel',e=>{e.preventDefault();if(interactive){zoomTarget=zoom=Math.max(.62,Math.min(1.75,zoom-e.deltaY*.0007))}},{passive:false});
   zoomIn.addEventListener('click',()=>{if(interactive)zoomTarget=zoom=Math.min(1.75,zoom+.18)});zoomOut.addEventListener('click',()=>{if(interactive)zoomTarget=zoom=Math.max(.62,zoom-.18)});
-  function tone(freq,start,dur,vol=.018){const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(0,start);g.gain.linearRampToValueAtTime(vol,start+.12);g.gain.exponentialRampToValueAtTime(.0001,start+dur);o.connect(g).connect(audio.destination);o.start(start);o.stop(start+dur+.04)}
-  const tune=[261.63,329.63,392,523.25,440,349.23,293.66,392];function playLoop(){if(!playing)return;const now=audio.currentTime+.05;tune.forEach((n,i)=>tone(n,now+i*.48,1.05,i%4? .014:.022));loopTimer=setTimeout(playLoop,tune.length*480)}
-  function startMusic(){audio ||= new (window.AudioContext||window.webkitAudioContext)();audio.resume();playing=true;playLoop();music.textContent='♫ Pausar';music.setAttribute('aria-pressed','true')}
-  function stopMusic(){playing=false;clearTimeout(loopTimer);music.textContent='♫ Música';music.setAttribute('aria-pressed','false')}
+  async function startMusic(){try{await audio.play();playing=true;music.textContent='â™« Pausar';music.setAttribute('aria-pressed','true')}catch(error){playing=false;music.textContent='â™« Reproducir';music.setAttribute('aria-pressed','false');console.error('No se pudo reproducir Camilo SÃ©ptimo - Ã“rbita.mp3:',error)}}
+  function stopMusic(){audio.pause();playing=false;music.textContent='â™« MÃºsica';music.setAttribute('aria-pressed','false')}
+  audio.addEventListener('error',()=>{playing=false;music.textContent='â™« Archivo no encontrado';music.setAttribute('aria-pressed','false')});
   enter.addEventListener('click',()=>{active=true;interactive=false;zoom=.26;zoomTarget=1;intro.classList.add('away');music.hidden=false;startMusic();setTimeout(()=>{interactive=true;hint.classList.add('show')},950);setTimeout(()=>hint.classList.remove('show'),6000)});music.addEventListener('click',()=>playing?stopMusic():startMusic());close.addEventListener('click',()=>modal.close());modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
   resize();makeSpace();addEventListener('resize',resize);requestAnimationFrame(frame);
 })();
