@@ -13,7 +13,7 @@
   const zoomIn = document.querySelector('#zoom-in');
   const zoomOut = document.querySelector('#zoom-out');
   let w=0,h=0,dpr=1,yaw=.2,pitch=-.36,zoom=1,zoomTarget=1,vy=0,vp=0,drag=false,moved=false,lastX=0,lastY=0,startX=0,startY=0,lastT=0,active=false,interactive=false;
-  const audio=new Audio(encodeURI('assets/Camilo SÃ©ptimo - Ã“rbita.mp3'));
+  const audio=new Audio(encodeURI('assets/Camilo Séptimo - Órbita.mp3'));
   audio.loop=true;
   audio.preload='metadata';
   audio.volume=.4;
